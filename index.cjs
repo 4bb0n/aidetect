@@ -44,7 +44,6 @@ io.on('connection', (socket) => {
     });
     socket.on('editedWriting', (user, content) => {
         writings[user] = content;
-        socket.broadcast.emit('writingEvent', writings[user], user);
     });
     socket.on('pasteDetected', (user, pasteContent) => {
         console.log(`User ${user} pasted content: ${pasteContent}`);
