@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Detector</title>
+    <style>
+        body{
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 200vh;
+        }
+        #writing {
+            width: 60%;
+            height: 80%;
+            border: 1px solid black;
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            overflow-y: auto;
+        }
+        #container {
+            width: 90%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+    <h1>Your writing here</h1><br>
+    <div id="writing" contenteditable="true"></div>
+    <div id="viewingWriting"></div>
+    </div>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        let pasted = false;
+        let usernameSent = false;
+        let username = prompt("Please enter your name");
+        document.getElementById('writing').addEventListener('paste', function(event) {
+            event.preventDefault(); // Prevent the default paste behavior
+            const text = (event.clipboardData || window.clipboardData).getData('text');
+            pasted = true;
+            document.execCommand('insertText', false, text); // Insert the pasted text into the contenteditable div
+        });
+        document.addEventListener('domcontentloaded', function() {
+            const writingDiv = document.getElementById('writing');
+            writingDiv.addEventListener('input', function() {
+            })
+        });
+        document.getElementById('writing').addEventListener('keydown', function(event) {
+            const text = this.textContent;
+            socket.emit("editedWriting", username, text);
+        });
+
+        socket.on("usernameTaken", () => {
+            alert("Username already taken, please choose another one");
+            username = prompt("Please enter your name");
+            usernameSent = false;
+        });
+        setInterval(() => {
+            if(pasted) {
+                pasted = false;
+                const writingDiv = document.getElementById('writing');
+                const text = writingDiv.textContent;
+                console.log("Pasted text detected:", text);
+                socket.emit("editedWriting", username, text);
+                socket.emit("pasteDetected", username, `<em>${text}</em>`);
+            }
+            if(!username || username === "") {
+                username = prompt("Please enter your name");
+            }
+            if(username !== null && username !== "" && !usernameSent) {
+                usernameSent = true;
+                socket.emit("userjoin", username)
+            }
+        }, 50);
+    </script>
+</body>
+</html>

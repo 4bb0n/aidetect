@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher's panel</title>
+    <style>
+        body{
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            height: 100vh;
+            background-color: rgb(226, 226, 226);
+        }
+        #students {
+            justify-self: center;
+            width: 60%;
+            height: 80%;
+            border: 1px solid black;
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            overflow-y: auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 2px 2px 2px gray;
+        }
+        .student {
+            cursor: pointer;
+            padding: 5px;
+            border-bottom: 1px solid #ccc;
+            background-color: green;
+            margin-bottom: 7px;
+            color: white;
+        }
+        .student:hover {
+            background-color: lightgreen;
+            color: black;
+        }
+        #container{
+            height: fit-content;
+        }
+        #viewingWriting {
+            width: 500px;
+            height: fit-content;
+            border: 1px solid black;
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            overflow-y: auto;
+            background-color: white;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 2px gray;
+        }
+        #allWritings {
+            width: 500px;
+            height: fit-content;
+            border: 1px solid black;
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            overflow-y: auto;
+            background-color: white;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 2px gray;
+        }
+        h1{
+            text-align: center;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            color: green;
+            background-color: white;
+            border-radius: 7px;
+            width: fit-content;
+            padding-left: 10px;
+            padding-right: 10px;
+            justify-self: center;
+        }
+        #outerContainer{
+            text-align: center;
+        }
+        .writing {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            color: white;
+            background-color: green;
+            overflow-y: word-wrap;
+            white-space: pre-wrap;
+        }
+        #studentCount {
+            font-weight: bold;
+            font-family: sans-serif;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="outerContainer">
+    <div id="container">
+    <h1>Teacher's panel</h1>
+    <p>Here you can see the students' writings</p>
+    <p>Click on a student's name to see their writing</p>
+    <h4 id="studentCount">Students:</h4>
+    <div id="students"></div>
+    <div id="viewingWriting" style="display: none;">
+        <button id="closeViewing">Close</button>
+    </div>
+    </div>
+    <div id="allWritings"></div>
+    </div>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        const studentsDiv = document.getElementById('students');
+
+        socket.emit("teacher_connected");
+        socket.on("userList", (users) => {
+            studentsDiv.innerHTML = ''; // Clear the previous list
+            users.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.textContent = user.username;
+                userDiv.style.cursor = 'pointer';
+                userDiv.className = 'student';
+                userDiv.addEventListener('click', () => {
+                    console.log(user.username);
+                    socket.emit("get_writing", user.username);
+                });
+                studentsDiv.appendChild(userDiv);
+            });
+            document.getElementById("studentCount").textContent = `Students: ${users.length}`;
+        })
+        socket.on("writingEvent", (text, username) => {
+            const writingDiv = document.createElement('div');
+            writingDiv.className = 'writing';
+            writingDiv.innerHTML = `<b>${username}</b>: ${text}`;
+            document.getElementById("viewingWriting").innerHTML = '';
+            document.getElementById("viewingWriting").style.display = 'block';
+            const closeButton = document.createElement("button");
+            closeButton.addEventListener('click', () => {
+                document.getElementById("viewingWriting").style.display = 'none';
+            });
+            closeButton.textContent = "Close";
+            closeButton.style.marginBottom = '10px';
+            closeButton.style.backgroundColor = 'red';
+            closeButton.style.color = 'white';
+            closeButton.style.cursor = 'pointer';
+            document.getElementById("viewingWriting").appendChild(closeButton);
+            document.getElementById("viewingWriting").appendChild(writingDiv);
+        });
+
+socket.on("userList", (users) => {
+    const allWritingsDiv = document.getElementById("allWritings");
+    allWritingsDiv.innerHTML = ''; // Clear the previous list
+    studentsDiv.innerHTML = ''; // Clear the previous list
+    users.forEach(user => {
+        const userDiv = document.createElement('div');
+        userDiv.textContent = user.username;
+        userDiv.style.cursor = 'pointer';
+        userDiv.className = 'student';
+        userDiv.addEventListener('click', () => {
+            console.log(user.username);
+            socket.emit("get_writing", user.username);
+        });
+        studentsDiv.appendChild(userDiv);
+        const writingDiv = document.createElement('div');
+        writingDiv.className = 'writing';
+        writingDiv.innerHTML = `<b>${user.username}</b>: ${user.text || 'No writing yet'}`;
+        allWritingsDiv.appendChild(writingDiv);
+    });
+});
+
+socket.on("allWritingsEvent", (writings) => {
+    const allWritingsDiv = document.getElementById("allWritings");
+    allWritingsDiv.innerHTML = '';
+    Object.entries(writings).forEach(([username, text]) => {
+        const writingDiv = document.createElement('div');
+        writingDiv.className = 'writing';
+        writingDiv.innerHTML = `<b>${username}</b>: ${text}`;
+        allWritingsDiv.appendChild(writingDiv);
+    });
+});
+    socket.on("pasteEvent", (username, text) => {
+        alert(`Student ${username} pasted text!`);
+    });
+    socket.on("userLeft", (username) => {
+        const userDivs = document.querySelectorAll('.student');
+        userDivs.forEach(userDiv => {
+            if (userDiv.textContent === username) {
+                userDiv.remove();
+            }
+        });
+        const allWritingsDiv = document.getElementById("allWritings");
+        const writingDivs = allWritingsDiv.querySelectorAll('div');
+        writingDivs.forEach(writingDiv => {
+            if (writingDiv.textContent.startsWith(`<b>${username}</b>:`)) {
+                writingDiv.remove();
+            }
+            console.log("removed")
+        });
+    });
+setInterval(() => {
+    socket.emit("get_all_writings");
+}, 100);
+    </script>
+</body>
+</html>
