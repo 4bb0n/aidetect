@@ -5,17 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher's panel</title>
     <style>
-        body{
+        body {
             justify-content: center;
             align-items: center;
             display: flex;
-            height: 100vh;
+            /* height: 100vh; remove fixed height to allow scrolling */
+            min-height: 100vh; /* Ensure body takes at least full viewport height */
             background-color: rgb(226, 226, 226);
+            padding-top: 20px; /* Add some padding at the top */
+            padding-bottom: 20px; /* Add some padding at the bottom */
+            flex-direction: column; /* Align outer container vertically */
         }
         #students {
             justify-self: center;
-            width: 60%;
-            height: 80%;
+            width: 100%; /* Make it responsive within its container */
+            max-width: 600px; /* Max width for student list */
+            height: 200px; /* Fixed height for scrollable list */
             border: 1px solid black;
             padding: 10px;
             font-size: 16px;
@@ -24,27 +29,35 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: 2px 2px 2px gray;
+            margin-bottom: 20px; /* Space below student list */
         }
         .student {
             cursor: pointer;
-            padding: 5px;
+            padding: 8px; /* Increased padding */
             border-bottom: 1px solid #ccc;
-            background-color: green;
+            background-color: #4CAF50; /* Darker green */
             margin-bottom: 7px;
             color: white;
+            border-radius: 5px; /* Rounded corners for student items */
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition */
         }
         .student:hover {
-            background-color: lightgreen;
+            background-color: #66bb6a; /* Lighter green on hover */
             color: black;
         }
-        #container{
+        #container { /* This seems to be a sub-container for title and student list */
+            width: 90%;
+            max-width: 700px; /* Limit width */
             height: fit-content;
+            text-align: center; /* Center h1 and p tags */
         }
         #viewingWriting {
-            width: 500px;
+            width: 90%; /* Responsive */
+            max-width: 600px;
+            min-height: 150px; /* Minimum height */
             height: fit-content;
             border: 1px solid black;
-            padding: 10px;
+            padding: 15px; /* Increased padding */
             font-size: 16px;
             font-family: Arial, sans-serif;
             overflow-y: auto;
@@ -53,159 +66,333 @@
             border-radius: 10px;
             box-shadow: 2px 2px 2px gray;
         }
-        #allWritings {
-            width: 500px;
-            height: fit-content;
-            border: 1px solid black;
+        #viewingWriting .writing-content { /* Class for the actual writing text */
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-top: 10px;
             padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        #allWritings {
+            width: 90%; /* Responsive */
+            max-width: 1200px; /* Wider for grid */
+            height: fit-content;
+            padding: 15px; /* Increased padding */
             font-size: 16px;
             font-family: Arial, sans-serif;
-            overflow-y: auto;
-            background-color: white;
+            overflow-y: auto; /* Should not be needed if height is fit-content */
+            background-color: #f0f0f0; /* Light gray background for the section */
             margin-top: 20px;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 10px;
+            gap: 15px; /* Increased gap */
             border-radius: 10px;
             box-shadow: 2px 2px 2px gray;
         }
-        h1{
+        h1 {
             text-align: center;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
-            color: green;
+            color: #2e7d32; /* Darker green for heading */
             background-color: white;
             border-radius: 7px;
             width: fit-content;
-            padding-left: 10px;
-            padding-right: 10px;
-            justify-self: center;
+            padding: 10px 20px; /* More padding */
+            margin-left: auto; /* Center block element */
+            margin-right: auto; /* Center block element */
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
         }
-        #outerContainer{
-            text-align: center;
+        #outerContainer {
+            text-align: center; /* Centers inline or inline-block children */
+            width: 100%;
         }
-        .writing {
-            margin-bottom: 10px;
-            padding: 5px;
+        .writing-block { /* Container for each student's writing in the grid */
+            padding: 10px;
             border: 1px solid #ccc;
-            color: white;
-            background-color: green;
-            overflow-y: word-wrap;
-            white-space: pre-wrap;
+            color: #333; /* Darker text for better readability */
+            background-color: white; /* White background for each writing block */
+            border-radius: 8px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column; /* Stack content vertically */
         }
+        .writing-block .username {
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+        .writing-block .text-content {
+            white-space: pre-wrap; /* Preserve formatting */
+            word-wrap: break-word; /* Break long words */
+            max-height: 200px; /* Limit height of text preview */
+            overflow-y: auto; /* Scroll if text is too long */
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            flex-grow: 1; /* Allow text content to grow */
+        }
+        .analyze-button {
+            padding: 8px 12px;
+            background-color: #007bff; /* Blue for action button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: auto; /* Push to bottom if in flex column */
+            transition: background-color 0.3s;
+        }
+        .analyze-button:hover {
+            background-color: #0056b3;
+        }
+        .analysis-result {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px dashed #ccc;
+            background-color: #e9ecef; /* Light background for analysis */
+            border-radius: 5px;
+            font-size: 13px;
+            white-space: pre-wrap; /* Preserve formatting of justification */
+            word-wrap: break-word;
+        }
+        .analysis-result .error {
+            color: red;
+            font-weight: bold;
+        }
+        .analysis-result .loading {
+            color: #007bff;
+            font-style: italic;
+        }
+
         #studentCount {
             font-weight: bold;
             font-family: sans-serif;
-            margin-top: 20px;
+            margin-top: 10px; /* Adjusted margin */
+            margin-bottom: 10px; /* Added margin */
+        }
+        #closeViewing { /* Style the close button in the viewingWriting div */
+            padding: 8px 15px;
+            background-color: #dc3545; /* Red */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        #closeViewing:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
     <div id="outerContainer">
-    <div id="container">
-    <h1>Teacher's panel</h1>
-    <p>Here you can see the students' writings</p>
-    <p>Click on a student's name to see their writing</p>
-    <h4 id="studentCount">Students:</h4>
-    <div id="students"></div>
-    <div id="viewingWriting" style="display: none;">
-        <button id="closeViewing">Close</button>
+        <div id="container">
+            <h1>Teacher's panel</h1>
+            <p>Here you can see the students' writings. Click on a student's name to see their individual writing, or view all writings below.</p>
+            <h4 id="studentCount">Students: 0</h4>
+            <div id="students"></div>
+            <div id="viewingWriting" style="display: none;">
+                {/* Content will be dynamically added here */}
+            </div>
+        </div>
+        <div id="allWritings">
+            {/* Student writings with analysis buttons will be dynamically added here */}
+        </div>
     </div>
-    </div>
-    <div id="allWritings"></div>
-    </div>
+
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
         const socket = io();
         const studentsDiv = document.getElementById('students');
+        const viewingWritingDiv = document.getElementById('viewingWriting');
+        const allWritingsDiv = document.getElementById('allWritings');
+        const studentCountP = document.getElementById('studentCount');
 
         socket.emit("teacher_connected");
+
+        // Listener for the list of connected students
         socket.on("userList", (users) => {
             studentsDiv.innerHTML = ''; // Clear the previous list
             users.forEach(user => {
                 const userDiv = document.createElement('div');
                 userDiv.textContent = user.username;
-                userDiv.style.cursor = 'pointer';
                 userDiv.className = 'student';
                 userDiv.addEventListener('click', () => {
-                    console.log(user.username);
+                    console.log("Requesting writing for:", user.username);
                     socket.emit("get_writing", user.username);
                 });
                 studentsDiv.appendChild(userDiv);
             });
-            document.getElementById("studentCount").textContent = `Students: ${users.length}`;
-        })
+            studentCountP.textContent = `Students: ${users.length}`;
+        });
+
+        // Listener for individual student's writing (when clicked from the list)
         socket.on("writingEvent", (text, username) => {
-            const writingDiv = document.createElement('div');
-            writingDiv.className = 'writing';
-            writingDiv.innerHTML = `<b>${username}</b>: ${text}`;
-            document.getElementById("viewingWriting").innerHTML = '';
-            document.getElementById("viewingWriting").style.display = 'block';
+            viewingWritingDiv.innerHTML = ''; // Clear previous content
+            viewingWritingDiv.style.display = 'block';
+
             const closeButton = document.createElement("button");
-            closeButton.addEventListener('click', () => {
-                document.getElementById("viewingWriting").style.display = 'none';
-            });
+            closeButton.id = "closeViewing";
             closeButton.textContent = "Close";
-            closeButton.style.marginBottom = '10px';
-            closeButton.style.backgroundColor = 'red';
-            closeButton.style.color = 'white';
-            closeButton.style.cursor = 'pointer';
-            document.getElementById("viewingWriting").appendChild(closeButton);
-            document.getElementById("viewingWriting").appendChild(writingDiv);
+            closeButton.addEventListener('click', () => {
+                viewingWritingDiv.style.display = 'none';
+            });
+            viewingWritingDiv.appendChild(closeButton);
+
+            const writingHeader = document.createElement('h3');
+            writingHeader.textContent = `Writing by: ${username}`;
+            viewingWritingDiv.appendChild(writingHeader);
+
+            const writingContentDiv = document.createElement('div');
+            writingContentDiv.className = 'writing-content'; // Added class for styling
+            writingContentDiv.textContent = text || 'No writing submitted yet.';
+            viewingWritingDiv.appendChild(writingContentDiv);
+
+            // Option to add analyze button here too if desired
+            const analyzeBtn = document.createElement('button');
+            analyzeBtn.textContent = 'Analyze this writing with AI';
+            analyzeBtn.className = 'analyze-button';
+            analyzeBtn.style.marginTop = '10px';
+            analyzeBtn.onclick = () => {
+                const resultPlaceholder = document.getElementById(`analysis-result-single-${username}`) || document.createElement('div');
+                resultPlaceholder.id = `analysis-result-single-${username}`;
+                resultPlaceholder.className = 'analysis-result';
+                resultPlaceholder.innerHTML = `<span class="loading">Analyzing...</span>`;
+                viewingWritingDiv.appendChild(resultPlaceholder); // Append if not already there
+                socket.emit('request_ai_analysis', username);
+            };
+            viewingWritingDiv.appendChild(analyzeBtn);
+
+            // Placeholder for analysis result in single view
+            const singleAnalysisResultDiv = document.createElement('div');
+            singleAnalysisResultDiv.id = `analysis-result-single-${username}`; // Unique ID for this view
+            singleAnalysisResultDiv.className = 'analysis-result';
+            singleAnalysisResultDiv.style.display = 'none'; // Initially hidden
+            viewingWritingDiv.appendChild(singleAnalysisResultDiv);
         });
 
-socket.on("userList", (users) => {
-    const allWritingsDiv = document.getElementById("allWritings");
-    allWritingsDiv.innerHTML = ''; // Clear the previous list
-    studentsDiv.innerHTML = ''; // Clear the previous list
-    users.forEach(user => {
-        const userDiv = document.createElement('div');
-        userDiv.textContent = user.username;
-        userDiv.style.cursor = 'pointer';
-        userDiv.className = 'student';
-        userDiv.addEventListener('click', () => {
-            console.log(user.username);
-            socket.emit("get_writing", user.username);
-        });
-        studentsDiv.appendChild(userDiv);
-        const writingDiv = document.createElement('div');
-        writingDiv.className = 'writing';
-        writingDiv.innerHTML = `<b>${user.username}</b>: ${user.text || 'No writing yet'}`;
-        allWritingsDiv.appendChild(writingDiv);
-    });
-});
+        // Listener for all writings (populates the grid view)
+        socket.on("allWritingsEvent", (writingsMap) => {
+            allWritingsDiv.innerHTML = ''; // Clear previous writings
+            Object.entries(writingsMap).forEach(([username, text]) => {
+                const writingBlock = document.createElement('div');
+                writingBlock.className = 'writing-block';
 
-socket.on("allWritingsEvent", (writings) => {
-    const allWritingsDiv = document.getElementById("allWritings");
-    allWritingsDiv.innerHTML = '';
-    Object.entries(writings).forEach(([username, text]) => {
-        const writingDiv = document.createElement('div');
-        writingDiv.className = 'writing';
-        writingDiv.innerHTML = `<b>${username}</b>: ${text}`;
-        allWritingsDiv.appendChild(writingDiv);
-    });
-});
-    socket.on("pasteEvent", (username, text) => {
-        alert(`Student ${username} pasted text!`);
-    });
-    socket.on("userLeft", (username) => {
-        const userDivs = document.querySelectorAll('.student');
-        userDivs.forEach(userDiv => {
-            if (userDiv.textContent === username) {
-                userDiv.remove();
+                const userP = document.createElement('p');
+                userP.className = 'username';
+                userP.textContent = username;
+                writingBlock.appendChild(userP);
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'text-content';
+                textDiv.textContent = text || 'No writing yet.';
+                writingBlock.appendChild(textDiv);
+
+                const analyzeButton = document.createElement('button');
+                analyzeButton.textContent = 'Analyze with AI';
+                analyzeButton.className = 'analyze-button';
+                analyzeButton.addEventListener('click', () => {
+                    const resultPlaceholder = document.getElementById(`analysis-result-${username}`);
+                    if (resultPlaceholder) {
+                        resultPlaceholder.innerHTML = `<span class="loading">Analyzing...</span>`;
+                        resultPlaceholder.style.display = 'block'; // Show it
+                    }
+                    socket.emit('request_ai_analysis', username);
+                });
+                writingBlock.appendChild(analyzeButton);
+
+                const analysisResultDiv = document.createElement('div');
+                analysisResultDiv.id = `analysis-result-${username}`; // Unique ID for each student
+                analysisResultDiv.className = 'analysis-result';
+                analysisResultDiv.style.display = 'none'; // Initially hidden
+                writingBlock.appendChild(analysisResultDiv);
+
+                allWritingsDiv.appendChild(writingBlock);
+            });
+        });
+
+        // Listener for AI analysis results
+        socket.on('ai_analysis_result', (data) => {
+            console.log('AI Analysis Result for:', data.username, data.result);
+            
+            // Try to update in the "all writings" grid view
+            const gridResultDiv = document.getElementById(`analysis-result-${data.username}`);
+            // Try to update in the "single writing" view
+            const singleResultDiv = document.getElementById(`analysis-result-single-${data.username}`);
+
+            let displayMessage = '';
+            if (data.result.error) {
+                displayMessage = `<span class="error">Error: ${data.result.error}</span>`;
+                if(data.result.rawResponse) { // If server sent raw response on parse error
+                    displayMessage += `<br><small>Raw AI Response: ${data.result.rawResponse.substring(0, 200)}...</small>`;
+                }
+            } else if (data.result.aiLikelihoodPercentage !== undefined) {
+                displayMessage = `
+                    <strong>AI Likelihood:</strong> ${data.result.aiLikelihoodPercentage}%<br>
+                    <strong>Confidence:</strong> ${data.result.confidence || 'N/A'}<br>
+                    <strong>Justification:</strong> ${data.result.justification || 'No justification provided.'}
+                `;
+            } else {
+                 displayMessage = `<span class="error">Unexpected analysis format received.</span>`;
+            }
+
+            if (gridResultDiv) {
+                gridResultDiv.innerHTML = displayMessage;
+                gridResultDiv.style.display = 'block'; // Make sure it's visible
+            }
+            if (singleResultDiv && viewingWritingDiv.style.display === 'block' && viewingWritingDiv.innerHTML.includes(data.username)) {
+                // Only update single view if it's currently showing this user's writing
+                singleResultDiv.innerHTML = displayMessage;
+                singleResultDiv.style.display = 'block';
             }
         });
-        const allWritingsDiv = document.getElementById("allWritings");
-        const writingDivs = allWritingsDiv.querySelectorAll('div');
-        writingDivs.forEach(writingDiv => {
-            if (writingDiv.textContent.startsWith(`<b>${username}</b>:`)) {
-                writingDiv.remove();
-            }
-            console.log("removed")
+
+        socket.on("pasteEvent", (username, text) => {
+            // You might want a less intrusive notification, e.g., a small log or visual cue
+            alert(`Student ${username} pasted text!`);
         });
-    });
-setInterval(() => {
-    socket.emit("get_all_writings");
-}, 100);
+
+        socket.on("userLeft", (username) => {
+            // Remove from student list
+            const studentDivs = studentsDiv.querySelectorAll('.student');
+            studentDivs.forEach(div => {
+                if (div.textContent === username) {
+                    div.remove();
+                }
+            });
+            // Remove from all writings grid
+            const writingBlocks = allWritingsDiv.querySelectorAll('.writing-block');
+            writingBlocks.forEach(block => {
+                const userP = block.querySelector('.username');
+                if (userP && userP.textContent === username) {
+                    block.remove();
+                }
+            });
+            // If viewing this user's writing, close it
+            if (viewingWritingDiv.style.display === 'block' && viewingWritingDiv.innerHTML.includes(`<h3>Writing by: ${username}</h3>`)) {
+                viewingWritingDiv.style.display = 'none';
+                viewingWritingDiv.innerHTML = '';
+            }
+            studentCountP.textContent = `Students: ${studentsDiv.children.length}`;
+
+        });
+
+        socket.on("emojiEvent", (username, emoji) => {
+            alert(`Student ${username} used a suspicious emoji: ${emoji}`);
+        });
+
+        // Consider reducing the frequency of this interval or making it on-demand
+        const allWritingsInterval = setInterval(() => {
+            socket.emit("get_all_writings");
+        }, 100); // Changed to 5 seconds, adjust as needed
+
+        // Clear interval when the window is closed or navigated away from
+        window.addEventListener('beforeunload', () => {
+            clearInterval(allWritingsInterval);
+        });
+
     </script>
 </body>
 </html>
